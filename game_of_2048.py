@@ -43,7 +43,7 @@ class GameOf2048:
         self.spawn_new_tile()
 
     def move(self, direction):
-        board = self.game_board
+        board = list(self.game_board)
         for i in range(direction):
             board = self.rotate_clockwise(board)
         board = self.push_left(board)
@@ -52,6 +52,18 @@ class GameOf2048:
         if board != self.game_board:
             self.game_board = board
             self.spawn_new_tile()
+            if not self.has_more_move():
+                print("No more move")
+
+    def has_more_move(self):
+        board = list(self.game_board)
+        for i in range(GameOf2048.BOARD_SIZE):
+            prev_board = list(board)
+            next_board = self.push_left(prev_board)
+            if prev_board != next_board:
+                return True
+            board = self.rotate_clockwise(board)
+        return False
 
     @staticmethod
     def rotate_clockwise(board):
