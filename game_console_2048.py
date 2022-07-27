@@ -69,8 +69,8 @@ class GameConsole2048:
         self._screen_.blit(score_text, score_text_rect)
         self._screen_.blit(time_text, time_text_rect)
 
-        for x in range(4):
-            for y in range(4):
+        for x in range(GameOf2048.BOARD_SIZE):
+            for y in range(GameOf2048.BOARD_SIZE):
                 num = self._game_.get_tile(x, y)
                 if num is not None and num != 0:
                     num_text = self._information_text_font_.render(f"{num}", True, BLACK)
@@ -110,10 +110,10 @@ class GameConsole2048:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        print("up")
+                        self._game_.move(GameOf2048.Direction.UP)
                     elif event.key == pygame.K_DOWN:
-                        print("down")
+                        self._game_.move(GameOf2048.Direction.DOWN)
                     elif event.key == pygame.K_LEFT:
-                        print("left")
+                        self._game_.move(GameOf2048.Direction.LEFT)
                     elif event.key == pygame.K_RIGHT:
-                        print("right")
+                        self._game_.move(GameOf2048.Direction.RIGHT)
