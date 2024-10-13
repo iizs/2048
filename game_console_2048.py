@@ -8,7 +8,6 @@ BLACK = 0, 0, 0
 WHITE = 255, 255, 255
 COLOR_BOARD = 200, 200, 200
 COLOR_NUM = {
-    0: (0, 0, 0),
     2: (255, 207, 218),
     4: (255, 218, 185),
     8: (253, 253, 150),
@@ -37,8 +36,6 @@ class GameConsole2048:
         self._information_text_font_color_ = WHITE
         self._tile_size_ = 150
         self._tile_text_font_name_ = 'Roboto'
-        self._tile_text_font_size_ = 64
-        self._tile_text_font_color_ = WHITE
 
         # main instances
         self._screen_ = pygame.display.set_mode(self._display_size_)
@@ -47,10 +44,55 @@ class GameConsole2048:
             self._information_text_font_name_,
             self._information_text_font_size_
         )
-        self._tile_text_font_ = pygame.font.SysFont(
+        self._tile_text_font_large_ = pygame.font.SysFont(
             self._tile_text_font_name_,
-            self._tile_text_font_size_
+            130
         )
+        self._tile_text_font_medium_ = pygame.font.SysFont(
+            self._tile_text_font_name_,
+            100
+        )
+        self._tile_text_font_small_ = pygame.font.SysFont(
+            self._tile_text_font_name_,
+            80
+        )
+        self._tile_text_fonts_ = {
+            2: self._tile_text_font_large_,
+            4: self._tile_text_font_large_,
+            8: self._tile_text_font_large_,
+            16: self._tile_text_font_large_,
+            32: self._tile_text_font_large_,
+            64: self._tile_text_font_large_,
+            128: self._tile_text_font_medium_,
+            256: self._tile_text_font_medium_,
+            512: self._tile_text_font_medium_,
+            1024: self._tile_text_font_small_,
+            2048: self._tile_text_font_small_,
+            4096: self._tile_text_font_small_,
+            8192: self._tile_text_font_small_,
+        }
+        # self._tile_text_sizes_ has been pre-calculated to enhance performance. 
+        # (text.get_height(), text.get_width()) respectively
+        # If font type and size are changed, this values also have to be re-calculated.
+        self._tile_text_sizes_ = {
+                2: (89, 49),
+                4: (89, 49),
+                8: (89, 49),
+                16: (89, 98),
+                32: (89, 103),
+                64: (89, 98),
+                128: (68, 118),
+                256: (68, 114),
+                512: (68, 114),
+                1024: (55, 128),
+                2048: (55, 133),
+                4096: (55, 133),
+                8192: (55, 127),
+        }
+        self._tile_text_offsets_ = { 
+            k: ( (self._tile_size_ - v[1]) / 2, (self._tile_size_ - v[0]) / 2 ) 
+            for k, v in self._tile_text_sizes_.items() 
+        }
 
     def update_screen(self):
         self._screen_.fill(self._screen_background_color_)
@@ -80,7 +122,7 @@ class GameConsole2048:
             for y in range(GameOf2048.BOARD_SIZE):
                 num = self._game_.get_tile(x, y)
                 if num is not None and num != 0:
-                    num_text = self._tile_text_font_.render(f"{num}", True, BLACK)
+                    num_text = self._tile_text_fonts_[num].render(f"{num}", True, BLACK)
                     if num in COLOR_NUM:
                         tile_color = COLOR_NUM[num]
                     else:
@@ -102,8 +144,8 @@ class GameConsole2048:
 
                 if num_text is not None:
                     num_text_rect = num_text.get_rect()
-                    num_text_rect.left = self._tile_size_ + x * (self._tile_size_ + 10) + 10
-                    num_text_rect.top = self._tile_size_ + y * (self._tile_size_ + 10) + 10
+                    num_text_rect.left = self._tile_size_ + x * (self._tile_size_ + 10) + self._tile_text_offsets_[num][0]
+                    num_text_rect.top = self._tile_size_ + y * (self._tile_size_ + 10) + self._tile_text_offsets_[num][1]
                     self._screen_.blit(num_text, num_text_rect)
 
         pygame.display.flip()
