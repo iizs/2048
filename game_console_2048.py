@@ -47,6 +47,12 @@ class GameConsole2048:
         self._reset_button_font_name_ = 'Roboto'
         self._reset_button_font_size_ = 36
         self._reset_button_font_color_ = BLACK
+
+        self._highscore_text_font_name_ = 'Roboto'
+        self._highscore_text_font_size_ = 24
+        self._highscore_text_font_color_ = WHITE
+        self._highscore_surface_coord_ = (800, 10)
+        self._highscore_surface_size_ = (430, 900)
         
         self._tile_size_ = 150
         self._tile_margin_ = 10
@@ -61,6 +67,10 @@ class GameConsole2048:
         self._reset_button_font_ = pygame.font.SysFont(
             self._reset_button_font_name_,
             self._reset_button_font_size_
+        )
+        self._highscore_text_font_ = pygame.font.SysFont(
+            self._highscore_text_font_name_,
+            self._highscore_text_font_size_
         )
         self._tile_text_font_large_ = pygame.font.SysFont(
             self._tile_text_font_name_,
@@ -115,6 +125,7 @@ class GameConsole2048:
         # main instances
         self._screen_ = pygame.display.set_mode(self._display_size_)
         self._information_surface_ = pygame.Surface(self._information_surface_size_)
+        self._highscore_surface_ = pygame.Surface(self._highscore_surface_size_)
         self._board_surface_ = pygame.Surface(self._board_surface_size_)
         self._game_ = GameOf2048()
         self._highscores_ = []
@@ -131,7 +142,7 @@ class GameConsole2048:
             end_game_text_color = self._screen_background_color_
 
         score_text = self._information_text_font_.render(
-            f"Score: {self._game_.score}",
+            f"Score: {self._game_.score:,}",
             True,
             self._information_text_font_color_
         )
@@ -162,6 +173,29 @@ class GameConsole2048:
         self._information_surface_.blit(end_game_text, end_game_text_rect)
 
         self._screen_.blit(self._information_surface_, self._information_surface_coord_)
+
+    def update_highscore_surface(self):
+        self._highscore_surface_.fill(self._screen_background_color_)
+
+        x = 0
+        y = 0
+        for num, score_item in enumerate(self._highscores_, start=1):
+            dt_str = datetime.datetime.fromisoformat(score_item['datetime']).strftime('%b/%d/%Y %H:%M')
+
+            score_text = self._highscore_text_font_.render(
+                f"{num}. {score_item['name']}: {score_item['score']:,}  on {dt_str}",
+                True,
+                self._highscore_text_font_color_
+            )
+            score_text_rect = score_text.get_rect()
+            score_text_rect.left = x
+            score_text_rect.top = y
+
+            y += score_text.get_height() + 10
+
+            self._highscore_surface_.blit(score_text, score_text_rect)
+
+        self._screen_.blit(self._highscore_surface_, self._highscore_surface_coord_)
 
     def update_board_surface(self):
         self._board_surface_.fill(self._screen_background_color_)
@@ -218,13 +252,14 @@ class GameConsole2048:
         self._screen_.fill(self._screen_background_color_)
 
         self.update_information_surface()
+        self.update_highscore_surface()
         self.update_board_surface()
         self.update_reset_button()
         
         pygame.display.flip()
     
     def sort_highscores(self):
-        pass
+        self._highscores_ = sorted(self._highscores_, key=lambda entity: entity['score'], reverse=True)
     
     def save_highscores(self):
         print("saving highscores...")
@@ -240,7 +275,7 @@ class GameConsole2048:
         if os.path.exists(HIGHSCORE_PATH):
             print("loading highscores...")
             with open(HIGHSCORE_PATH, '+r') as f:
-                self._highscores_ = json.load(f, object_hook=datetime_decoder)
+                self._highscores_ = json.load(f)
             self.sort_highscores()
 
     def add_highscore(self):
