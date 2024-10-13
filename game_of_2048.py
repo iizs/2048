@@ -19,6 +19,10 @@ class GameOf2048:
                    None, None, None, None,
                    None, None, None, None,
                    None, None, None, None]
+    COLOR_TEST_BOARD = [2, 4, 8, 16,
+                        32, 64, 128, 256,
+                        512, 1024, 2048, 4096,
+                        8192, None, None, None]
     # 0 1 2 3        c 8 4 0
     # 4 5 6 7   =>   d 9 5 1
     # 8 9 a b        e a 6 2
