@@ -1,6 +1,8 @@
 import sys
 import pygame
 import datetime
+import json
+import os
 from game_of_2048 import GameOf2048
 
 
@@ -23,9 +25,11 @@ COLOR_NUM = {
     8192: (174, 226, 232),
 }
 
+HIGHSCORE_PATH = './highscores.json'
+
 
 class GameConsole2048:
-    def __init__(self):
+    def __init__(self, enable_highscore_name_input=False, reset_highscore=False):
         pygame.init()
 
         # Display attributes
@@ -113,6 +117,8 @@ class GameConsole2048:
         self._information_surface_ = pygame.Surface(self._information_surface_size_)
         self._board_surface_ = pygame.Surface(self._board_surface_size_)
         self._game_ = GameOf2048()
+        self._highscores_ = []
+        self.load_highscores()
     
     def update_information_surface(self):
         self._information_surface_.fill(self._screen_background_color_)
@@ -216,11 +222,46 @@ class GameConsole2048:
         self.update_reset_button()
         
         pygame.display.flip()
+    
+    def sort_highscores(self):
+        pass
+    
+    def save_highscores(self):
+        print("saving highscores...")
+        with open(HIGHSCORE_PATH, '+w') as f:
+            json.dump(self._highscores_, f)
+
+    def load_highscores(self):
+        def datetime_decoder(obj):
+            if 'datetime' in obj:
+                obj['datetime'] = datetime.datetime.fromisoformat(obj['datetime'])
+            return obj
+
+        if os.path.exists(HIGHSCORE_PATH):
+            print("loading highscores...")
+            with open(HIGHSCORE_PATH, '+r') as f:
+                self._highscores_ = json.load(f, object_hook=datetime_decoder)
+            self.sort_highscores()
+
+    def add_highscore(self):
+        score_entity = {
+            'name': 'NoName',
+            'datetime': datetime.datetime.now().isoformat(),
+            'score': self._game_.score
+        }
+        self._highscores_.append(score_entity)
+        self.sort_highscores()
+        self.save_highscores()
 
     def run(self):
         wait = True
+        gameend_flag = self._game_.game_ended
         while wait:
             self.update_screen()
+            if gameend_flag != self._game_.game_ended:
+                if self._game_.game_ended:
+                    self.add_highscore()
+                gameend_flag = self._game_.game_ended
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -238,3 +279,4 @@ class GameConsole2048:
                     if (self._reset_button_coord_[0] <= mouse[0] <= self._reset_button_coord_[0] + self._reset_button_size_[0] 
                         and self._reset_button_coord_[1] <= mouse[1] <= self._reset_button_coord_[1] + self._reset_button_size_[1]): 
                         self._game_.reset()
+                        self.save_highscores()
