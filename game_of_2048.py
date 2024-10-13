@@ -35,36 +35,43 @@ class GameOf2048:
         # in game variables
         self.game_board = None
         self.start_time = None
+        self.end_time = None
         self.score = None
+        self.game_ended = False
 
         self.reset()
 
     def reset(self):
+        self.game_ended = False
         self.score = 0
         self.start_time = datetime.datetime.now()
+        self.end_time = None
         self.game_board = list(self.EMPTY_BOARD)
         self.spawn_new_tile()
         self.spawn_new_tile()
 
     def move(self, direction):
+        if self.game_ended:
+            return
         board = list(self.game_board)
         for i in range(direction):
             board = GameOf2048.rotate_clockwise(board)
         board, score_up = GameOf2048.push_left(board)
-        for i in range(GameOf2048.BOARD_SIZE - direction):
+        for i in range((4 - direction) % 4):
             board = GameOf2048.rotate_clockwise(board)
         if board != self.game_board:
             self.score += score_up
             self.game_board = board
             self.spawn_new_tile()
             if not self.has_more_move():
-                print("No more move")
+                self.game_ended = True
+                self.end_time = datetime.datetime.now()
 
     def has_more_move(self):
         board = list(self.game_board)
-        for i in range(GameOf2048.BOARD_SIZE):
+        for i in range(4):
             prev_board = list(board)
-            next_board = GameOf2048.push_left(prev_board)
+            next_board, _ = GameOf2048.push_left(prev_board)
             if prev_board != next_board:
                 return True
             board = GameOf2048.rotate_clockwise(board)

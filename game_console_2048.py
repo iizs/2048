@@ -97,6 +97,13 @@ class GameConsole2048:
     def update_screen(self):
         self._screen_.fill(self._screen_background_color_)
 
+        if self._game_.game_ended:
+            end_time = self._game_.end_time
+            end_game_text_color = self._information_text_font_color_
+        else:
+            end_time = datetime.datetime.now()
+            end_game_text_color = self._screen_background_color_
+
         score_text = self._information_text_font_.render(
             f"Score: {self._game_.score}",
             True,
@@ -107,16 +114,26 @@ class GameConsole2048:
         score_text_rect.top = 10
 
         time_text = self._information_text_font_.render(
-            f"Elapsed Time: {datetime.datetime.now() - self._game_.start_time}",
+            f"Elapsed Time: {end_time - self._game_.start_time}",
             True,
             self._information_text_font_color_
         )
         time_text_rect = time_text.get_rect()
         time_text_rect.left = 10
-        time_text_rect.top = 10 + score_text_rect.height + 10
+        time_text_rect.top = score_text_rect.top + score_text_rect.height + 10
+
+        end_game_text = self._information_text_font_.render(
+            f"Game Over",
+            True,
+            end_game_text_color
+        )
+        end_game_text_rect = end_game_text.get_rect()
+        end_game_text_rect.left = 10
+        end_game_text_rect.top = time_text_rect.top + time_text_rect.height + 10
 
         self._screen_.blit(score_text, score_text_rect)
         self._screen_.blit(time_text, time_text_rect)
+        self._screen_.blit(end_game_text, end_game_text_rect)
 
         for x in range(GameOf2048.BOARD_SIZE):
             for y in range(GameOf2048.BOARD_SIZE):
