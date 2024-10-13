@@ -36,6 +36,14 @@ class GameConsole2048:
         self._information_text_font_color_ = WHITE
         self._information_surface_coord_ = (0, 0)
         self._information_surface_size_ = (1000, 100)
+
+        self._reset_button_color_ = 'gray'
+        self._reset_button_size_ = (150, 40)
+        self._reset_button_coord_ = (580, 20)
+        self._reset_button_font_name_ = 'Roboto'
+        self._reset_button_font_size_ = 36
+        self._reset_button_font_color_ = BLACK
+        
         self._tile_size_ = 150
         self._tile_margin_ = 10
         self._tile_text_font_name_ = 'Roboto'
@@ -45,6 +53,10 @@ class GameConsole2048:
         self._information_text_font_ = pygame.font.SysFont(
             self._information_text_font_name_,
             self._information_text_font_size_
+        )
+        self._reset_button_font_ = pygame.font.SysFont(
+            self._reset_button_font_name_,
+            self._reset_button_font_size_
         )
         self._tile_text_font_large_ = pygame.font.SysFont(
             self._tile_text_font_name_,
@@ -179,12 +191,29 @@ class GameConsole2048:
                     self._board_surface_.blit(num_text, num_text_rect)
         
         self._screen_.blit(self._board_surface_, self._board_surface_coord_)
+    
+    def update_reset_button(self):
+        pygame.draw.rect(
+            self._screen_,
+            self._reset_button_color_,
+            pygame.Rect(self._reset_button_coord_, self._reset_button_size_)
+        )
+        reset_button_text = self._reset_button_font_.render(
+            "RESET",
+            True,
+            self._reset_button_font_color_
+        )
+        reset_button_text_rect = reset_button_text.get_rect()
+        reset_button_text_rect.left = self._reset_button_coord_[0] + 35
+        reset_button_text_rect.top = self._reset_button_coord_[1] + 8
+        self._screen_.blit(reset_button_text, reset_button_text_rect)
 
     def update_screen(self):
         self._screen_.fill(self._screen_background_color_)
 
         self.update_information_surface()
         self.update_board_surface()
+        self.update_reset_button()
         
         pygame.display.flip()
 
@@ -204,3 +233,8 @@ class GameConsole2048:
                         self._game_.move(GameOf2048.Direction.LEFT)
                     elif event.key == pygame.K_RIGHT:
                         self._game_.move(GameOf2048.Direction.RIGHT)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse = pygame.mouse.get_pos() 
+                    if (self._reset_button_coord_[0] <= mouse[0] <= self._reset_button_coord_[0] + self._reset_button_size_[0] 
+                        and self._reset_button_coord_[1] <= mouse[1] <= self._reset_button_coord_[1] + self._reset_button_size_[1]): 
+                        self._game_.reset()
