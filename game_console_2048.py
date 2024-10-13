@@ -34,12 +34,14 @@ class GameConsole2048:
         self._information_text_font_name_ = 'Roboto'
         self._information_text_font_size_ = 24
         self._information_text_font_color_ = WHITE
+        self._information_surface_coord_ = (0, 0)
+        self._information_surface_size_ = (1000, 100)
         self._tile_size_ = 150
+        self._tile_margin_ = 10
         self._tile_text_font_name_ = 'Roboto'
+        self._board_surface_coord_ = (100, 120)
+        self._board_surface_size_ = ((self._tile_size_ + self._tile_margin_) * 4, (self._tile_size_ + self._tile_margin_) * 4)
 
-        # main instances
-        self._screen_ = pygame.display.set_mode(self._display_size_)
-        self._game_ = GameOf2048()
         self._information_text_font_ = pygame.font.SysFont(
             self._information_text_font_name_,
             self._information_text_font_size_
@@ -94,8 +96,14 @@ class GameConsole2048:
             for k, v in self._tile_text_sizes_.items() 
         }
 
-    def update_screen(self):
-        self._screen_.fill(self._screen_background_color_)
+        # main instances
+        self._screen_ = pygame.display.set_mode(self._display_size_)
+        self._information_surface_ = pygame.Surface(self._information_surface_size_)
+        self._board_surface_ = pygame.Surface(self._board_surface_size_)
+        self._game_ = GameOf2048()
+    
+    def update_information_surface(self):
+        self._information_surface_.fill(self._screen_background_color_)
 
         if self._game_.game_ended:
             end_time = self._game_.end_time
@@ -131,9 +139,14 @@ class GameConsole2048:
         end_game_text_rect.left = 10
         end_game_text_rect.top = time_text_rect.top + time_text_rect.height + 10
 
-        self._screen_.blit(score_text, score_text_rect)
-        self._screen_.blit(time_text, time_text_rect)
-        self._screen_.blit(end_game_text, end_game_text_rect)
+        self._information_surface_.blit(score_text, score_text_rect)
+        self._information_surface_.blit(time_text, time_text_rect)
+        self._information_surface_.blit(end_game_text, end_game_text_rect)
+
+        self._screen_.blit(self._information_surface_, self._information_surface_coord_)
+
+    def update_board_surface(self):
+        self._board_surface_.fill(self._screen_background_color_)
 
         for x in range(GameOf2048.BOARD_SIZE):
             for y in range(GameOf2048.BOARD_SIZE):
@@ -149,11 +162,11 @@ class GameConsole2048:
                     tile_color = COLOR_BOARD
 
                 pygame.draw.rect(
-                    self._screen_,
+                    self._board_surface_,
                     tile_color,
                     pygame.Rect(
-                        self._tile_size_ + x * (self._tile_size_ + 10),
-                        self._tile_size_ + y * (self._tile_size_ + 10),
+                        x * (self._tile_size_ + self._tile_margin_),
+                        y * (self._tile_size_ + self._tile_margin_),
                         self._tile_size_,
                         self._tile_size_
                     )
@@ -161,10 +174,18 @@ class GameConsole2048:
 
                 if num_text is not None:
                     num_text_rect = num_text.get_rect()
-                    num_text_rect.left = self._tile_size_ + x * (self._tile_size_ + 10) + self._tile_text_offsets_[num][0]
-                    num_text_rect.top = self._tile_size_ + y * (self._tile_size_ + 10) + self._tile_text_offsets_[num][1]
-                    self._screen_.blit(num_text, num_text_rect)
+                    num_text_rect.left = x * (self._tile_size_ + self._tile_margin_) + self._tile_text_offsets_[num][0]
+                    num_text_rect.top = y * (self._tile_size_ + self._tile_margin_) + self._tile_text_offsets_[num][1]
+                    self._board_surface_.blit(num_text, num_text_rect)
+        
+        self._screen_.blit(self._board_surface_, self._board_surface_coord_)
 
+    def update_screen(self):
+        self._screen_.fill(self._screen_background_color_)
+
+        self.update_information_surface()
+        self.update_board_surface()
+        
         pygame.display.flip()
 
     def run(self):
