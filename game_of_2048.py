@@ -49,11 +49,12 @@ class GameOf2048:
     def move(self, direction):
         board = list(self.game_board)
         for i in range(direction):
-            board = self.rotate_clockwise(board)
-        board = self.push_left(board)
+            board = GameOf2048.rotate_clockwise(board)
+        board, score_up = GameOf2048.push_left(board)
         for i in range(GameOf2048.BOARD_SIZE - direction):
-            board = self.rotate_clockwise(board)
+            board = GameOf2048.rotate_clockwise(board)
         if board != self.game_board:
+            self.score += score_up
             self.game_board = board
             self.spawn_new_tile()
             if not self.has_more_move():
@@ -63,10 +64,10 @@ class GameOf2048:
         board = list(self.game_board)
         for i in range(GameOf2048.BOARD_SIZE):
             prev_board = list(board)
-            next_board = self.push_left(prev_board)
+            next_board = GameOf2048.push_left(prev_board)
             if prev_board != next_board:
                 return True
-            board = self.rotate_clockwise(board)
+            board = GameOf2048.rotate_clockwise(board)
         return False
 
     @staticmethod
@@ -83,6 +84,7 @@ class GameOf2048:
     @staticmethod
     def push_left_one_row(row):
         idx = 0
+        score_up = 0
         while idx < GameOf2048.BOARD_SIZE:
             if row[idx] is None:
                 all_none = True
@@ -101,18 +103,22 @@ class GameOf2048:
                     elif row[idx_2] == row[idx]:
                         row[idx] += row[idx_2]
                         row[idx_2] = None
+                        score_up += row[idx]
                         break
                     else:  # row[idx_2] != row[idx]
                         break
                 idx += 1
-        return row
+        return row, score_up
 
     @staticmethod
     def push_left(board):
         new_board = []
+        score_up = 0
         for r in range(GameOf2048.BOARD_SIZE):
-            new_board.extend(GameOf2048.push_left_one_row(board[r * 4:(r + 1) * 4]))
-        return new_board
+            new_row, score = GameOf2048.push_left_one_row(board[r * 4:(r + 1) * 4])
+            new_board.extend(new_row)
+            score_up += score
+        return new_board, score_up
 
     def get_tile(self, x, y):
         if x < GameOf2048.BOARD_SIZE and y < GameOf2048.BOARD_SIZE:
