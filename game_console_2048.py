@@ -9,19 +9,19 @@ WHITE = 255, 255, 255
 COLOR_BOARD = 200, 200, 200
 COLOR_NUM = {
     0: (0, 0, 0),
-    2: (190, 190, 190),
-    4: (180, 180, 180),
-    8: (170, 170, 170),
-    16: (160, 160, 160),
-    32: (150, 150, 150),
-    64: (140, 140, 140),
-    128: (130, 130, 130),
-    256: (120, 120, 120),
-    512: (110, 110, 110),
-    1024: (100, 100, 100),
-    2048: (90, 90, 90),
-    4096: (80, 80, 80),
-    8192: (70, 70, 70),
+    2: (255, 207, 218),
+    4: (255, 218, 185),
+    8: (253, 253, 150),
+    16: (179, 238, 232),
+    32: (189, 252, 201),
+    64: (230, 230, 250),
+    128: (255, 182, 193),
+    256: (255, 180, 159),
+    512: (255, 239, 104),
+    1024: (173, 216, 230),
+    2048: (152, 251, 152),
+    4096: (221, 160, 221),
+    8192: (174, 226, 232),
 }
 
 
@@ -36,6 +36,9 @@ class GameConsole2048:
         self._information_text_font_size_ = 24
         self._information_text_font_color_ = WHITE
         self._tile_size_ = 150
+        self._tile_text_font_name_ = 'Roboto'
+        self._tile_text_font_size_ = 64
+        self._tile_text_font_color_ = WHITE
 
         # main instances
         self._screen_ = pygame.display.set_mode(self._display_size_)
@@ -43,6 +46,10 @@ class GameConsole2048:
         self._information_text_font_ = pygame.font.SysFont(
             self._information_text_font_name_,
             self._information_text_font_size_
+        )
+        self._tile_text_font_ = pygame.font.SysFont(
+            self._tile_text_font_name_,
+            self._tile_text_font_size_
         )
 
     def update_screen(self):
@@ -73,7 +80,7 @@ class GameConsole2048:
             for y in range(GameOf2048.BOARD_SIZE):
                 num = self._game_.get_tile(x, y)
                 if num is not None and num != 0:
-                    num_text = self._information_text_font_.render(f"{num}", True, BLACK)
+                    num_text = self._tile_text_font_.render(f"{num}", True, BLACK)
                     if num in COLOR_NUM:
                         tile_color = COLOR_NUM[num]
                     else:
